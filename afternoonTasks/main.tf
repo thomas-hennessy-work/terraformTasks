@@ -23,6 +23,13 @@ resource "azurerm_subnet" "terraform_example"{
   address_prefixes = ["10.0.2.0/24"]
 }
 
+resource "azurerm_public_ip" "terraform_example" {
+  name                = "PublicIp1"
+  resource_group_name = azurerm_resource_group.terraform_example.name
+  location            = azurerm_resource_group.terraform_example.location
+  allocation_method   = "Dynamic"
+}
+
 resource "azurerm_network_interface" "terraform_example"{
   name = "example-nint"
   location = azurerm_resource_group.terraform_example.location
@@ -32,6 +39,7 @@ resource "azurerm_network_interface" "terraform_example"{
     name = "internal"
     subnet_id = azurerm_subnet.terraform_example.id
     private_ip_address_allocation = "Dynamic"
+    public_ip_address_id = azurerm_public_ip.terraform_example.id
   }
 }
 
