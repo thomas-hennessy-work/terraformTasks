@@ -69,17 +69,17 @@ resource "azurerm_subnet_network_security_group_association" "terraform_example"
 }
 
 resource "azurerm_linux_virtual_machine" "terraform_example"{
-  name = "example-machine"
+  name = var.name
   resource_group_name = azurerm_resource_group.terraform_example.name
   location = azurerm_resource_group.terraform_example.location
-  size = "Standard_F2"
-  admin_username = "tom"
+  size = var.size
+  admin_username = var.adminuser
   network_interface_ids = [
     azurerm_network_interface.terraform_example.id,
   ]
 
   admin_ssh_key {
-    username   = "tom"
+    username   = var.adminuser
     public_key = file("/home/tom/.ssh/id_rsa.pub")
   }
 
