@@ -1,3 +1,5 @@
 variable "region" {
-  default = "France Central"
+}
+
+variable "ResourceGroupName" {
 }

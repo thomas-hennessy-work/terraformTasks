@@ -1,30 +1,21 @@
-provider "azurerm" {
-  features {}
-}
-
-resource "azurerm_resource_group" "NetflixRG" {
-  name     = "Netflix-Resources"
-  location = var.region
-}
-
 resource "azurerm_virtual_network" "NetflixVN" {
   name                = "Netflix-Vertual-Network"
-  resource_group_name = azurerm_resource_group.NetflixRG.name
-  location            = azurerm_resource_group.NetflixRG.location
+  resource_group_name = var.ResourceGroupName
+  location            = var.region
   address_space       = ["10.0.0.0/16"]
 }
 
 resource "azurerm_subnet" "NVNSubnet" {
   name                 = "Netflix-Subnet"
-  resource_group_name  = azurerm_resource_group.NetflixRG.name
+  resource_group_name  = var.ResourceGroupName
   virtual_network_name = azurerm_virtual_network.NetflixVN.name
   address_prefixes     = ["10.0.2.0/24"]
 }
 
 resource "azurerm_network_security_group" "NFSecurityGroup" {
   name                = "NetflixSecurityGroup"
-  location            = azurerm_resource_group.NetflixRG.location
-  resource_group_name = azurerm_resource_group.NetflixRG.name
+  location            = var.region
+  resource_group_name = var.ResourceGroupName
 
   security_rule {
     name                       = "allowSSH"
@@ -45,8 +36,8 @@ resource "azurerm_network_security_group" "NFSecurityGroup" {
 
 resource "azurerm_linux_virtual_machine_scale_set" "NetflixVMSS" {
   name                = "Netflix-Scale-Set"
-  resource_group_name = azurerm_resource_group.NetflixRG.name
-  location            = azurerm_resource_group.NetflixRG.location
+  resource_group_name = var.ResourceGroupName
+  location            = var.region
   sku                 = "Standard_F1"
   instances           = 3
   admin_username      = "tom"
