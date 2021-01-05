@@ -1,19 +1,19 @@
 resource "azurerm_virtual_network" "NetflixVN" {
-  name                = "Netflix-Vertual-Network"
+  name                = "Netflix-Vertual-Network${var.key}"
   resource_group_name = var.ResourceGroupName
   location            = var.region
   address_space       = ["10.0.0.0/16"]
 }
 
 resource "azurerm_subnet" "NVNSubnet" {
-  name                 = "Netflix-Subnet"
+  name                 = "Netflix-Subnet${var.key}"
   resource_group_name  = var.ResourceGroupName
   virtual_network_name = azurerm_virtual_network.NetflixVN.name
   address_prefixes     = ["10.0.2.0/24"]
 }
 
 resource "azurerm_network_security_group" "NFSecurityGroup" {
-  name                = "NetflixSecurityGroup"
+  name                = "NetflixSecurityGroup${var.key}"
   location            = var.region
   resource_group_name = var.ResourceGroupName
 
@@ -28,14 +28,10 @@ resource "azurerm_network_security_group" "NFSecurityGroup" {
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
-
-  tags = {
-    environment = "Production"
-  }
 }
 
 resource "azurerm_linux_virtual_machine_scale_set" "NetflixVMSS" {
-  name                = "Netflix-Scale-Set"
+  name                = "Netflix-Scale-Set${var.key}"
   resource_group_name = var.ResourceGroupName
   location            = var.region
   sku                 = "Standard_F1"
@@ -60,12 +56,12 @@ resource "azurerm_linux_virtual_machine_scale_set" "NetflixVMSS" {
   }
 
   network_interface {
-    name    = "Network-Interface"
-    primary = true
+    name                      = "Network-Interface${var.key}"
+    primary                   = true
     network_security_group_id = azurerm_network_security_group.NFSecurityGroup.id
 
     ip_configuration {
-      name      = "internal"
+      name      = "internal${var.key}"
       primary   = true
       subnet_id = azurerm_subnet.NVNSubnet.id
 

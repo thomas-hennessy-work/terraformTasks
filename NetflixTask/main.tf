@@ -11,15 +11,16 @@ variable "location" {
   description = "availability zones for netflix"
   default = {
     1 = "France Central"
-    2 = "West India"
+    2 = "Australia Central"
     3 = "Japan East"
   }
 }
 
-module "Netflix_Scale_Set"{
+module "Netflix_Scale_Set" {
   for_each = var.location
 
-  source = "./ScaleSet"
-  region = each.value
+  source            = "./ScaleSet"
+  region            = each.value
+  key = each.key
   ResourceGroupName = azurerm_resource_group.NetflixRG.name
 }
