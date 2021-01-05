@@ -71,3 +71,104 @@ resource "azurerm_linux_virtual_machine_scale_set" "NetflixVMSS" {
     }
   }
 }
+
+resource "azurerm_monitor_autoscale_setting" "NetflixSSMonitor" {
+  name                = "ScaleSetMonitor${var.key}"
+  resource_group_name = var.ResourceGroupName
+  location            = var.region
+  target_resource_id  = azurerm_linux_virtual_machine_scale_set.NetflixVMSS.id
+
+  profile {
+    name = "Active"
+
+    capacity {
+      default = 1
+      minimum = 1
+      maximum = 3
+    }
+
+    rule {
+      metric_trigger {
+        metric_name        = "Percentage CPU"
+        metric_resource_id = azurerm_linux_virtual_machine_scale_set.NetflixVMSS.id
+        time_grain         = "PT1M"
+        statistic          = "Average"
+        time_window        = "PT5M"
+        time_aggregation   = "Average"
+        operator           = "GreaterThan"
+        threshold          = 75
+      }
+
+      scale_action {
+        direction = "Increase"
+        type      = "ChangeCount"
+        value     = "1"
+        cooldown  = "PT1M"
+      }
+    }
+
+    rule {
+      metric_trigger {
+        metric_name        = "Percentage CPU"
+        metric_resource_id = azurerm_linux_virtual_machine_scale_set.NetflixVMSS.id
+        time_grain         = "PT1M"
+        statistic          = "Average"
+        time_window        = "PT5M"
+        time_aggregation   = "Average"
+        operator           = "LessThan"
+        threshold          = 10
+      }
+
+      scale_action {
+        direction = "Decrease"
+        type      = "ChangeCount"
+        value     = "1"
+        cooldown  = "PT1M"
+      }
+    }
+
+    recurrence {
+      timezone  = var.timezone
+      days      = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+      hours     = [var.active_hour]
+      minutes   = [var.active_min]
+    }
+  }
+
+  profile {
+    name = "Inactive"
+
+    capacity {
+      default = 0
+      minimum = 0
+      maximum = 0
+    }
+
+    # rule {
+    #   metric_trigger {
+    #     metric_name        = "Percentage CPU"
+    #     metric_resource_id = azurerm_virtual_machine_scale_set.example.id
+    #     time_grain         = "PT1M"
+    #     statistic          = "Average"
+    #     time_window        = "PT5M"
+    #     time_aggregation   = "Average"
+    #     operator           = "GreaterThan"
+    #     threshold          = 90
+    #   }
+
+    #   scale_action {
+    #     direction = "Increase"
+    #     type      = "ChangeCount"
+    #     value     = "2"
+    #     cooldown  = "PT1M"
+    #   }
+    # }
+
+    recurrence {
+      timezone  = var.timezone
+      days      = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+      hours     = [var.inactive_hour]
+      minutes   = [var.inactive_min]
+    }
+  }
+}
